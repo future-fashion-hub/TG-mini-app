@@ -140,7 +140,7 @@ function App() {
     setActiveDragOverDay(null)
   }
 
-  const handleDragOver = ({ active, over }: DragOverEvent) => {
+  const handleDragOver = ({ over }: DragOverEvent) => {
     if (!over) {
       setActiveDragOverDay(null)
       return
