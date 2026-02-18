@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.week-grid {
+  align-items: stretch;
+}
+
+.task-card {
+  animation: fadeInUp 260ms ease;
+  touch-action: none;
+  user-select: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
