@@ -40,3 +40,37 @@
 .read-the-docs {
   color: #888;
 }
+
+@keyframes task-disappear {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes task-collapse {
+  0% {
+    max-height: var(--card-height, 200px);
+    margin-bottom: 0;
+  }
+  100% {
+    max-height: 0;
+    margin-bottom: 0;
+    padding: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+}
+
+.task-card-disappear {
+  will-change: transform, opacity;
+  animation:
+    task-disappear 350ms ease-in-out forwards,
+    task-collapse 150ms ease-in 350ms forwards;
+  pointer-events: none;
+  transform-origin: center center;
+}

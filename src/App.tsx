@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import './App.css'
 import {
   DndContext,
   PointerSensor,
@@ -29,7 +30,7 @@ function App() {
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
   const { user, isTelegram } = useTelegramWebApp()
-  const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday } = useTaskStore()
+  const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
 
   const weekStart = getWeekStart(now)
@@ -43,6 +44,7 @@ function App() {
     })
 
     tasks.forEach((task) => {
+      if (task.completed) return
       if (!grouped.has(task.startDate)) return
       grouped.get(task.startDate)?.push(task)
     })
@@ -91,7 +93,8 @@ function App() {
 
   useEffect(() => {
     rollIncompleteTasksToToday()
-  }, [rollIncompleteTasksToToday, todayKey])
+    checkStreakExpiry()
+  }, [rollIncompleteTasksToToday, checkStreakExpiry, todayKey])
 
   useEffect(() => {
     let targetTilt = 0
@@ -200,7 +203,7 @@ function App() {
       <Stack gap="md">
         <Group justify="space-between" align="start">
           <div>
-            <Title order={2}>Weekly Planner Mini App</Title>
+            <Title order={2}>Weekly</Title>
             <Text c="dimmed" size="sm">
               {isTelegram
                 ? `Привет, ${user?.first_name || user?.username || 'друг'}! План на неделю готов.`

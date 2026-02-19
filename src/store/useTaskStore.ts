@@ -17,6 +17,7 @@ interface TaskState {
   reorderInDay: (day: string, orderedTaskIds: string[]) => void
   recalculateStreak: () => void
   rollIncompleteTasksToToday: () => void
+  checkStreakExpiry: () => void
 }
 
 const seedTasks: Task[] = [
@@ -74,8 +75,10 @@ export const useTaskStore = create<TaskState>()(
 
       toggleCompleted: (taskId) => {
         const today = formatISODate(dayjs())
-        set((state) => ({
-          tasks: state.tasks.map((task) => {
+        const yesterday = formatISODate(dayjs().subtract(1, 'day'))
+
+        set((state) => {
+          const updatedTasks = state.tasks.map((task) => {
             if (task.id !== taskId) return task
             const nextCompleted = !task.completed
             return {
@@ -83,9 +86,22 @@ export const useTaskStore = create<TaskState>()(
               completed: nextCompleted,
               completedAt: nextCompleted ? today : undefined,
             }
-          }),
-        }))
-        get().recalculateStreak()
+          })
+
+          const hasCompletedToday = updatedTasks.some(
+            (task) => task.completed && task.completedAt === today,
+          )
+
+          if (!hasCompletedToday || state.lastStreakDate === today) {
+            return { tasks: updatedTasks }
+          }
+
+          return {
+            tasks: updatedTasks,
+            streak: state.lastStreakDate === yesterday ? state.streak + 1 : 1,
+            lastStreakDate: today,
+          }
+        })
       },
 
       moveTask: (taskId, startDate, order) => {
@@ -184,9 +200,20 @@ export const useTaskStore = create<TaskState>()(
           return { tasks: updatedTasks }
         })
       },
+
+      checkStreakExpiry: () => {
+        const today = formatISODate(dayjs())
+        const yesterday = formatISODate(dayjs().subtract(1, 'day'))
+        const { lastStreakDate } = get()
+
+        if (lastStreakDate && lastStreakDate !== today && lastStreakDate !== yesterday) {
+          set({ streak: 0, lastStreakDate: null })
+        }
+      },
     }),
     {
       name: 'tg-weekly-planner-storage',
+      version: 3,
       partialize: (state) => ({
         tasks: state.tasks,
         streak: state.streak,

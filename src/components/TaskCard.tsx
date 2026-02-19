@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import { Box, Button, Card, Checkbox, Group, Stack, Text } from '@mantine/core'
 import { IconBell, IconCalendar } from '@tabler/icons-react'
 import dayjs from 'dayjs'
@@ -21,7 +22,12 @@ const priorityConfig = {
   high: { color: 'var(--mantine-color-red-6)' },
 } as const
 
+const DISAPPEAR_DURATION = 500
+
 export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDropAnimationDone }: TaskCardProps) => {
+  const [isDisappearing, setIsDisappearing] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: {
@@ -29,6 +35,14 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
       startDate: task.startDate,
     },
   })
+
+  const handleToggle = () => {
+    if (isDisappearing) return
+    setIsDisappearing(true)
+    timerRef.current = setTimeout(() => {
+      onToggleComplete(task.id)
+    }, DISAPPEAR_DURATION)
+  }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -50,8 +64,14 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
       shadow="sm"
       radius="md"
       p="sm"
-      className="task-card"
-      style={{ ...style, width: '100%', position: 'relative', overflow: 'hidden' }}
+      className={`task-card${isDisappearing ? ' task-card-disappear' : ''}`}
+      style={{
+        ...style,
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        ...(isDisappearing ? { animationDuration: `${DISAPPEAR_DURATION}ms` } : {}),
+      }}
       {...attributes}
       {...listeners}
     >
@@ -105,8 +125,8 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
         <Group justify="space-between" align="center">
           <Checkbox
             size="xs"
-            checked={task.completed}
-            onChange={() => onToggleComplete(task.id)}
+            checked={task.completed || isDisappearing}
+            onChange={handleToggle}
             label="Выполнено"
           />
           <Button
