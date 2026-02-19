@@ -26,7 +26,7 @@ const DISAPPEAR_DURATION = 500
 
 export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDropAnimationDone }: TaskCardProps) => {
   const [isDisappearing, setIsDisappearing] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
