@@ -3,9 +3,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 import type { NewTaskInput, Task } from '../types/task'
-import { formatISODate, getWeekStart } from '../utils/date'
-
-const weekStart = getWeekStart()
+import { formatISODate } from '../utils/date'
 
 interface TaskState {
   tasks: Task[]
@@ -148,6 +146,23 @@ export const useTaskStore = create<TaskState>()(
 
             const taskStart = dayjs(task.startDate).startOf('day')
             const taskEnd = dayjs(task.endDate).startOf('day')
+
+            // Task is entirely in the past — move to today
+            if (taskEnd.isBefore(today, 'day')) {
+              changed = true
+              const order = dayOrders.get(todayKey) ?? 0
+              dayOrders.set(todayKey, order + 1)
+
+              return {
+                ...task,
+                startDate: todayKey,
+                endDate: todayKey,
+                progressStartDate: todayKey,
+                order,
+              }
+            }
+
+            // Task spans across today — shift startDate forward
             const daysLeft = Math.max(0, taskEnd.diff(today, 'day'))
             const targetDate = formatISODate(taskEnd.subtract(daysLeft, 'day'))
 
