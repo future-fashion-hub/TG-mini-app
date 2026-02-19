@@ -20,35 +20,10 @@ interface TaskState {
   checkStreakExpiry: () => void
 }
 
-const seedTasks: Task[] = [
-  {
-    id: uuidv4(),
-    title: 'Подготовить weekly отчёт',
-    description: 'Собрать результаты за неделю и отправить команде',
-    priority: 'high',
-    startDate: formatISODate(weekStart),
-    progressStartDate: formatISODate(weekStart),
-    endDate: formatISODate(weekStart.add(2, 'day')),
-    completed: false,
-    order: 0,
-  },
-  {
-    id: uuidv4(),
-    title: 'Рефакторинг формы регистрации',
-    description: 'Оптимизировать валидацию и поля',
-    priority: 'medium',
-    startDate: formatISODate(weekStart.add(3, 'day')),
-    progressStartDate: formatISODate(weekStart.add(3, 'day')),
-    endDate: formatISODate(weekStart.add(4, 'day')),
-    completed: false,
-    order: 0,
-  },
-]
-
 export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
-      tasks: seedTasks,
+      tasks: [],
       streak: 0,
       lastStreakDate: null,
 
@@ -213,7 +188,7 @@ export const useTaskStore = create<TaskState>()(
     }),
     {
       name: 'tg-weekly-planner-storage',
-      version: 3,
+      version: 4,
       partialize: (state) => ({
         tasks: state.tasks,
         streak: state.streak,

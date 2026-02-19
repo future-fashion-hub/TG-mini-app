@@ -199,11 +199,11 @@ function App() {
   }
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="xl" py="md" px="sm">
       <Stack gap="md">
         <Group justify="space-between" align="start">
           <div>
-            <Title order={2}>Weekly</Title>
+            <Title order={2}>Weekly Planner Mini App</Title>
             <Text c="dimmed" size="sm">
               {isTelegram
                 ? `Привет, ${user?.first_name || user?.username || 'друг'}! План на неделю готов.`
