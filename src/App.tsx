@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   rectIntersection,
   useSensor,
@@ -29,7 +29,7 @@ function App() {
   const [selectedDay, setSelectedDay] = useState(formatISODate(now))
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
-  const { user, isTelegram } = useTelegramWebApp()
+  const { user, isTelegram, hapticFeedback } = useTelegramWebApp()
   const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
 
@@ -68,14 +68,14 @@ function App() {
   }, [tasksByDay])
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 6,
+        distance: 10,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 120,
+        delay: 250,
         tolerance: 5,
       },
     }),
@@ -140,6 +140,7 @@ function App() {
   }, [])
 
   const handleDragStart = (_event: DragStartEvent) => {
+    hapticFeedback?.impactOccurred('medium')
     setActiveDragOverDay(null)
   }
 

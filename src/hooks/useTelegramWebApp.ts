@@ -12,6 +12,10 @@ export const useTelegramWebApp = () => {
       return
     }
 
+    if (webApp.initDataUnsafe?.user) {
+      setUser(webApp.initDataUnsafe.user)
+    }
+
     webApp.ready?.()
     webApp.expand?.()
 
@@ -22,15 +26,14 @@ export const useTelegramWebApp = () => {
     if (webApp.themeParams?.bg_color) {
       document.body.style.backgroundColor = webApp.themeParams.bg_color
     }
-
-    if (webApp.initDataUnsafe?.user) {
-      setUser(webApp.initDataUnsafe.user)
-    }
   }, [])
 
   return {
     user,
     colorScheme,
     isTelegram: Boolean(window.Telegram?.WebApp),
+    hapticFeedback: window.Telegram?.WebApp?.HapticFeedback,
+    webApp: window.Telegram?.WebApp,
   }
 }
+
