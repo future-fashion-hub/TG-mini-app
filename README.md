@@ -34,12 +34,3 @@ npm run dev
 npm run build
 npm run preview
 ```
-
-## Деплой на Vercel
-
-Проект имеет стандартную структуру Vite и не требует специальной конфигурации.
-
-1. Импортируйте репозиторий в Vercel.
-2. Framework Preset: `Vite`.
-3. Build Command: `npm run build`.
-4. Output Directory: `dist`.
