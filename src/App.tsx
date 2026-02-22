@@ -10,7 +10,8 @@ import {
 } from '@dnd-kit/core'
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Button, Container, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core'
+import { Button, Container, Group, SimpleGrid, Stack, Text, Title, ActionIcon } from '@mantine/core'
+import { IconPlus } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { AddTaskModal } from './components/AddTaskModal'
 import { DayColumn } from './components/DayColumn'
@@ -211,7 +212,7 @@ function App() {
                 : 'Telegram WebApp не обнаружен. Режим локальной разработки.'}
             </Text>
           </div>
-          <Button onClick={openAddTask}>+ Добавить задачу</Button>
+          <Button visibleFrom="sm" onClick={openAddTask}>+ Добавить задачу</Button>
         </Group>
 
         <StreakWidget streak={streak} />
@@ -246,6 +247,18 @@ function App() {
         onClose={() => setModalOpened(false)}
         onSubmit={addTask}
       />
+
+      <ActionIcon
+        hiddenFrom="sm"
+        className="fab-add"
+        size={46}
+        radius="xl"
+        variant="filled"
+        onClick={openAddTask}
+        aria-label="Добавить задачу"
+      >
+        <IconPlus size={20} />
+      </ActionIcon>
     </Container>
   )
 }
