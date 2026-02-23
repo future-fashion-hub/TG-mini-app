@@ -2,7 +2,7 @@ import { ActionIcon, Button, Collapse, Group, Modal, Select, Stack, Text, TextIn
 import { useForm } from '@mantine/form'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import type { NewTaskInput } from '../types/task'
 import { DATE_FORMAT, formatISODate } from '../utils/date'
 
@@ -33,6 +33,19 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
     },
   })
 
+  useLayoutEffect(() => {
+    if (opened) {
+      setExpanded(false)
+      form.setValues({
+        title: '',
+        description: '',
+        priority: 'medium',
+        startDate: formatISODate(defaultDate),
+        endDate: formatISODate(defaultDate),
+      })
+    }
+  }, [opened, defaultDate])
+
   return (
     <Modal
       opened={opened}
@@ -40,16 +53,6 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
       title="Новая задача"
       radius="lg"
       centered
-      onEnterTransitionEnd={() => {
-        setExpanded(false)
-        form.setValues({
-          title: '',
-          description: '',
-          priority: 'medium',
-          startDate: formatISODate(defaultDate),
-          endDate: formatISODate(defaultDate),
-        })
-      }}
     >
       <form
         onSubmit={form.onSubmit((values) => {
