@@ -10,7 +10,7 @@ import {
 } from '@dnd-kit/core'
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Button, Container, Group, SimpleGrid, Stack, Text, Title, ActionIcon } from '@mantine/core'
+import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon } from '@mantine/core'
 import { IconPlus } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { AddTaskModal } from './components/AddTaskModal'
@@ -30,7 +30,7 @@ function App() {
   const [selectedDay, setSelectedDay] = useState(formatISODate(now))
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
-  const { user, isTelegram, hapticFeedback } = useTelegramWebApp()
+  const { hapticFeedback } = useTelegramWebApp()
   const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
 
