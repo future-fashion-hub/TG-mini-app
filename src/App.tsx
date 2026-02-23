@@ -203,19 +203,15 @@ function App() {
   return (
     <Container size="xl" py="md" px="sm">
       <Stack gap="md">
-        <Group justify="space-between" align="start">
-          <div>
-            <Title order={2}>Weekly Planner Mini App</Title>
-            <Text c="dimmed" size="sm">
-              {isTelegram
-                ? `Привет, ${user?.first_name || user?.username || 'друг'}! План на неделю готов.`
-                : 'Telegram WebApp не обнаружен. Режим локальной разработки.'}
-            </Text>
+        <Group justify="space-between" align="center" wrap="nowrap">
+          <div style={{ flex: 1 }}>
+            <Title order={2} style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>Weekly Manager</Title>
           </div>
-          <Button visibleFrom="sm" onClick={openAddTask}>+ Добавить задачу</Button>
+          <Group gap={8} wrap="nowrap">
+             <StreakWidget streak={streak} />
+             <Button visibleFrom="sm" onClick={openAddTask} size="xs">+ Задача</Button>
+          </Group>
         </Group>
-
-        <StreakWidget streak={streak} />
 
         <DndContext sensors={sensors} collisionDetection={rectIntersection} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <SimpleGrid
@@ -251,7 +247,7 @@ function App() {
       <ActionIcon
         hiddenFrom="sm"
         className="fab-add"
-        size={46}
+        size={56}
         radius="xl"
         variant="filled"
         onClick={openAddTask}
