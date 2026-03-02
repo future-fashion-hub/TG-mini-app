@@ -41,6 +41,7 @@ export const DayColumn = ({
 
   return (
     <Card
+      id={`day-col-${dayKey}`}
       ref={setNodeRef}
       withBorder={!isBacklog}
       radius="lg"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import {
   DndContext,
@@ -151,6 +151,54 @@ function App() {
       waterTilt.boost = 0
     }
   }, [])
+
+  const scrollToFirstDayWithTasks = useCallback(() => {
+    for (const day of weekDays) {
+      const tasksInDay = tasksByDay.get(day.key) ?? []
+      if (tasksInDay.length > 0) {
+        const el = document.getElementById(`day-col-${day.key}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+        break
+      }
+    }
+  }, [weekDays, tasksByDay])
+
+  useEffect(() => {
+    let lastTapTime = 0
+
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement
+      // Ignore interactive elements
+      if (target.closest('button, a, input, textarea, .mantine-ActionIcon-root, .mantine-Modal-root')) {
+        return
+      }
+      
+      const currentTime = new Date().getTime()
+      const tapLength = currentTime - lastTapTime
+
+      if (tapLength < 300 && tapLength > 0) {
+        scrollToFirstDayWithTasks()
+      }
+      
+      lastTapTime = currentTime
+    }
+
+    const handleDblClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('button, a, input, textarea, .mantine-ActionIcon-root, .mantine-Modal-root')) return
+      scrollToFirstDayWithTasks()
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('dblclick', handleDblClick)
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown)
+      window.removeEventListener('dblclick', handleDblClick)
+    }
+  }, [scrollToFirstDayWithTasks])
 
   const handleDragStart = (event: DragStartEvent) => {
     hapticFeedback?.impactOccurred('medium')
