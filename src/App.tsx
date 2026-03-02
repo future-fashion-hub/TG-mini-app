@@ -31,6 +31,7 @@ function App() {
   const [selectedDay, setSelectedDay] = useState(formatISODate(now))
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
+  const [isDraggingFromBacklog, setIsDraggingFromBacklog] = useState(false)
   const { hapticFeedback } = useTelegramWebApp()
   const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
@@ -150,9 +151,13 @@ function App() {
     }
   }, [])
 
-  const handleDragStart = (_event: DragStartEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
     hapticFeedback?.impactOccurred('medium')
     setActiveDragOverDay(null)
+    const id = String(event.active.id)
+    if (taskDayMap.get(id) === 'backlog') {
+      setIsDraggingFromBacklog(true)
+    }
   }
 
   const handleDragOver = ({ over }: DragOverEvent) => {
@@ -173,6 +178,7 @@ function App() {
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     setActiveDragOverDay(null)
+    setIsDraggingFromBacklog(false)
     if (!over) return
 
     const activeId = String(active.id)
@@ -208,7 +214,18 @@ function App() {
     reorderInDay(sourceDay, nextSource)
     reorderInDay(targetDay, nextTarget)
     setJustDroppedId(activeId)
+
+    if (sourceDay === 'backlog' && targetDay !== 'backlog') {
+      setBacklogOpened(false)
+    }
   }
+
+  const handleDragCancel = () => {
+    setActiveDragOverDay(null)
+    setIsDraggingFromBacklog(false)
+  }
+
+  const shouldHideBacklogUi = isDraggingFromBacklog && activeDragOverDay !== 'backlog'
 
   return (
     <Container size="xl" py="md" px="sm">
@@ -233,7 +250,7 @@ function App() {
           </Group>
         </Group>
 
-        <DndContext sensors={sensors} collisionDetection={rectIntersection} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+        <DndContext sensors={sensors} collisionDetection={rectIntersection} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
           <SimpleGrid
             cols={{ base: 1, xs: 2, sm: 2, md: 3, lg: 7 }}
             spacing={DAY_GAP_PX}
@@ -261,9 +278,20 @@ function App() {
             title={<Text fw={700} size="sm">Бэклог</Text>}
             radius="lg"
             centered
+            keepMounted
+            styles={{
+              root: {
+                pointerEvents: shouldHideBacklogUi ? 'none' : 'auto',
+              },
+              inner: {
+                opacity: shouldHideBacklogUi ? 0 : 1,
+                transition: 'opacity 0.2s ease',
+              },
+            }}
             overlayProps={{ 
-              backgroundOpacity: 0.55, 
-              blur: 3,
+              backgroundOpacity: shouldHideBacklogUi ? 0 : 0.55, 
+              blur: shouldHideBacklogUi ? 0 : 3,
+              transitionProps: { duration: 200 },
             }}
           >
             <DayColumn
