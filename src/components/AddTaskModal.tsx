@@ -4,7 +4,7 @@ import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { useLayoutEffect, useState } from 'react'
 import type { NewTaskInput } from '../types/task'
-import { DATE_FORMAT, formatISODate } from '../utils/date'
+import { DATE_FORMAT } from '../utils/date'
 
 interface AddTaskModalProps {
   opened: boolean
