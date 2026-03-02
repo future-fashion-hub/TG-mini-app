@@ -5,11 +5,10 @@ import {
   MouseSensor,
   TouchSensor,
   pointerWithin,
-  rectIntersection,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import type { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
+import type { CollisionDetection, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon, Modal, Text } from '@mantine/core'
 import { IconPlus, IconArchive } from '@tabler/icons-react'
@@ -163,8 +162,8 @@ function App() {
     }
   }
 
-  const handleDragMove = ({ delta }: DragMoveEvent) => {
-    // Distance logic removed in favor of pointerWithin and hover
+  const handleDragMove = () => {
+    // Distance logic removed in favor of customCollisionDetection
   }
 
   const handleDragOver = ({ over }: DragOverEvent) => {
@@ -241,6 +240,23 @@ function App() {
     setHasExitedBacklog(false)
   }
 
+  const customCollisionDetection: CollisionDetection = (args) => {
+    if (isDraggingFromBacklog && !hasExitedBacklog && args.pointerCoordinates) {
+      const modalEl = document.querySelector('.mantine-Modal-content')
+      if (modalEl) {
+        const rect = modalEl.getBoundingClientRect()
+        const p = args.pointerCoordinates
+        if (p.x >= rect.left && p.x <= rect.right && p.y >= rect.top && p.y <= rect.bottom) {
+          const backlogDroppable = args.droppableContainers.find((c) => c.id === 'day-backlog')
+          if (backlogDroppable) {
+            return [{ id: 'day-backlog', data: backlogDroppable.data }]
+          }
+        }
+      }
+    }
+    return pointerWithin(args)
+  }
+
   const shouldHideBacklogUi = isDraggingFromBacklog && hasExitedBacklog
 
   return (
@@ -266,7 +282,7 @@ function App() {
           </Group>
         </Group>
 
-        <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+        <DndContext sensors={sensors} collisionDetection={customCollisionDetection} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
           <SimpleGrid
             cols={{ base: 1, xs: 2, sm: 2, md: 3, lg: 7 }}
             spacing={DAY_GAP_PX}
