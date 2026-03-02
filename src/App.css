@@ -75,6 +75,16 @@
   transform-origin: center center;
 }
 
+.task-card,
+.task-card .mantine-Card-section,
+.task-card .mantine-Paper-root {
+  border-radius: 12px !important;
+}
+
+.task-card {
+  overflow: hidden !important;
+}
+
 .fab-add {
   position: fixed !important;
   bottom: 40px;

@@ -10,8 +10,8 @@ import {
 } from '@dnd-kit/core'
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
+import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon, Modal, Text } from '@mantine/core'
+import { IconPlus, IconArchive } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { AddTaskModal } from './components/AddTaskModal'
 import { DayColumn } from './components/DayColumn'
@@ -27,6 +27,7 @@ const DAY_GAP_PX = 12
 function App() {
   const [now, setNow] = useState(dayjs())
   const [modalOpened, setModalOpened] = useState(false)
+  const [backlogOpened, setBacklogOpened] = useState(false)
   const [selectedDay, setSelectedDay] = useState(formatISODate(now))
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
@@ -43,17 +44,26 @@ function App() {
     weekDays.forEach((day) => {
       grouped.set(day.key, [])
     })
+    grouped.set('backlog', [])
 
     tasks.forEach((task) => {
       if (task.completed) return
-      if (!grouped.has(task.startDate)) return
-      grouped.get(task.startDate)?.push(task)
+      
+      if (task.startDate && grouped.has(task.startDate)) {
+        grouped.get(task.startDate)?.push(task)
+      } else {
+        grouped.get('backlog')?.push(task)
+      }
     })
 
     grouped.forEach((value, key) => {
       grouped.set(
         key,
-        [...value].sort((a, b) => a.order - b.order || dayjs(a.endDate).diff(dayjs(b.endDate), 'day')),
+        [...value].sort((a, b) => {
+          if (a.order !== b.order) return a.order - b.order
+          if (!a.endDate || !b.endDate) return 0
+          return dayjs(a.endDate).diff(dayjs(b.endDate), 'day')
+        }),
       )
     })
 
@@ -194,7 +204,7 @@ function App() {
     const nextTarget = [...targetIds]
     nextTarget.splice(targetIndex, 0, activeId)
 
-    moveTask(activeId, targetDay, targetIndex)
+    moveTask(activeId, targetDay === 'backlog' ? undefined : targetDay, targetIndex)
     reorderInDay(sourceDay, nextSource)
     reorderInDay(targetDay, nextTarget)
     setJustDroppedId(activeId)
@@ -208,6 +218,16 @@ function App() {
             <Title order={2} style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>Weekly Manager</Title>
           </div>
           <Group gap={8} wrap="nowrap">
+             <ActionIcon 
+                variant="light" 
+                color="blue" 
+                size="lg" 
+                radius="md" 
+                onClick={() => setBacklogOpened(true)}
+                aria-label="Backlog"
+             >
+               <IconArchive size={20} />
+             </ActionIcon>
              <StreakWidget streak={streak} />
              <Button visibleFrom="sm" onClick={openAddTask} size="xs">+ Задача</Button>
           </Group>
@@ -234,6 +254,28 @@ function App() {
               />
             ))}
           </SimpleGrid>
+
+          <Modal 
+            opened={backlogOpened} 
+            onClose={() => setBacklogOpened(false)} 
+            title={<Text fw={700} size="sm">Бэклог</Text>}
+            radius="lg"
+            centered
+            overlayProps={{ 
+              backgroundOpacity: 0.55, 
+              blur: 3,
+            }}
+          >
+            <DayColumn
+              dayKey="backlog"
+              dayLabel=""
+              dayDate=""
+              tasks={tasksByDay.get('backlog') ?? []}
+              onToggleComplete={toggleCompleted}
+              isDragOver={activeDragOverDay === 'backlog'}
+              variant="backlog"
+            />
+          </Modal>
         </DndContext>
       </Stack>
 

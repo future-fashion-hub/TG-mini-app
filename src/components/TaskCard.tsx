@@ -62,7 +62,6 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
       ref={setNodeRef}
       withBorder
       shadow="sm"
-      radius="md"
       p="sm"
       className={`task-card${isDisappearing ? ' task-card-disappear' : ''}`}
       style={{
@@ -70,6 +69,7 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
         width: '100%',
         position: 'relative',
         overflow: 'hidden',
+        isolation: 'isolate',
         ...(isDisappearing ? { animationDuration: `${DISAPPEAR_DURATION}ms` } : {}),
       }}
       {...attributes}
@@ -108,19 +108,21 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
           </Text>
         ) : null}
 
-        <Group justify="space-between" align="center">
-          <Group gap={4}>
-            <IconCalendar size={14} />
+        {task.startDate && task.endDate ? (
+          <Group justify="space-between" align="center">
+            <Group gap={4}>
+              <IconCalendar size={14} />
+              <Text size="xs" c="dimmed">
+                {task.startDate === task.endDate
+                  ? dayjs(task.startDate).format('DD.MM')
+                  : `${dayjs(task.startDate).format('DD.MM')} – ${dayjs(task.endDate).format('DD.MM')}`}
+              </Text>
+            </Group>
             <Text size="xs" c="dimmed">
-              {task.startDate === task.endDate
-                ? dayjs(task.startDate).format('DD.MM')
-                : `${dayjs(task.startDate).format('DD.MM')} – ${dayjs(task.endDate).format('DD.MM')}`}
+              {daysLeft === 0 ? 'Сегодня' : `${daysLeft} дн.`}
             </Text>
           </Group>
-          <Text size="xs" c="dimmed">
-            {daysLeft === 0 ? 'Сегодня' : `${daysLeft} дн.`}
-          </Text>
-        </Group>
+        ) : null}
 
         <Group justify="space-between" align="center">
           <Checkbox

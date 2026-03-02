@@ -24,12 +24,15 @@ export const getWeekDays = (baseDate = dayjs()) => {
 }
 
 export const getTaskDurationDays = (task: Task) => {
+  if (!task.startDate || !task.endDate) return 1
   const start = dayjs(task.startDate)
   const end = dayjs(task.endDate)
   return Math.max(1, end.diff(start, 'day') + 1)
 }
 
 export const getTaskProgress = (task: Task, now = dayjs()) => {
+  if (!task.startDate || !task.endDate) return 0
+
   const start = dayjs(task.progressStartDate ?? task.startDate)
   const end = dayjs(task.endDate)
   const deadlineDayStart = end.startOf('day')
@@ -57,10 +60,13 @@ export const getProgressFillColor = (progress: number) => {
   return 'rgba(250, 82, 82, 0.34)'
 }
 
-export const isTaskOverdue = (task: Task, now = dayjs()) =>
-  !task.completed && now.isAfter(dayjs(task.endDate), 'day')
+export const isTaskOverdue = (task: Task, now = dayjs()) => {
+  if (!task.endDate) return false
+  return !task.completed && now.isAfter(dayjs(task.endDate), 'day')
+}
 
 export const getTaskSpan = (task: Task, weekStart = getWeekStart()) => {
+  if (!task.startDate || !task.endDate) return 0
   const weekStartDate = dayjs(weekStart)
   const weekEndDate = weekStartDate.add(6, 'day')
   const start = dayjs(task.startDate)

@@ -21,15 +21,17 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
       title: '',
       description: '',
       priority: 'medium',
-      startDate: defaultDate,
-      endDate: defaultDate,
+      startDate: '',
+      endDate: '',
     },
     validate: {
       title: (value) => (value.trim().length < 2 ? 'Минимум 2 символа' : null),
-      endDate: (value, values) =>
-        dayjs(value, DATE_FORMAT).isBefore(dayjs(values.startDate, DATE_FORMAT), 'day')
+      endDate: (value, values) => {
+        if (!values.startDate || !value) return null
+        return dayjs(value, DATE_FORMAT).isBefore(dayjs(values.startDate, DATE_FORMAT), 'day')
           ? 'Дедлайн не может быть раньше старта'
-          : null,
+          : null
+      },
     },
   })
 
@@ -40,8 +42,8 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
         title: '',
         description: '',
         priority: 'medium',
-        startDate: formatISODate(defaultDate),
-        endDate: formatISODate(defaultDate),
+        startDate: '',
+        endDate: '',
       })
     }
   }, [opened, defaultDate])
@@ -56,7 +58,12 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
     >
       <form
         onSubmit={form.onSubmit((values) => {
-          onSubmit(values)
+          const payload = {
+            ...values,
+            startDate: values.startDate || undefined,
+            endDate: values.endDate || undefined,
+          }
+          onSubmit(payload)
           onClose()
         })}
       >

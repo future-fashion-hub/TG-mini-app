@@ -13,6 +13,7 @@ interface DayColumnProps {
   isDragOver?: boolean
   justDroppedId?: string | null
   clearJustDropped?: () => void
+  variant?: 'default' | 'backlog'
 }
 
 export const DayColumn = ({
@@ -24,7 +25,9 @@ export const DayColumn = ({
   isDragOver = false,
   justDroppedId,
   clearJustDropped,
+  variant = 'default',
 }: DayColumnProps) => {
+  const isBacklog = variant === 'backlog'
   const { setNodeRef } = useDroppable({
     id: `day-${dayKey}`,
     data: {
@@ -36,9 +39,11 @@ export const DayColumn = ({
   return (
     <Card
       ref={setNodeRef}
-      withBorder
+      withBorder={!isBacklog}
       radius="lg"
-      p="sm"
+      p={isBacklog ? 0 : 'sm'}
+      bg={isBacklog ? 'transparent' : undefined}
+      shadow={isBacklog ? 'none' : undefined}
       style={{
         minHeight: 280,
         overflow: 'hidden',
@@ -47,14 +52,16 @@ export const DayColumn = ({
       }}
     >
       <Stack gap="sm">
-        <Group justify="space-between" align="start" wrap="nowrap">
-          <Text fw={700} size="sm">
-            {dayLabel}
-          </Text>
-          <Text size="xs" c="dimmed" ta="right">
-            {dayDate}
-          </Text>
-        </Group>
+        {!isBacklog && (
+          <Group justify="space-between" align="start" wrap="nowrap">
+            <Text fw={700} size="sm">
+              {dayLabel}
+            </Text>
+            <Text size="xs" c="dimmed" ta="right">
+              {dayDate}
+            </Text>
+          </Group>
+        )}
 
         <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
           <Stack gap="xs">

@@ -5,9 +5,9 @@ export interface Task {
   title: string
   description?: string
   priority: TaskPriority
-  startDate: string
+  startDate?: string
   progressStartDate?: string
-  endDate: string
+  endDate?: string
   completed: boolean
   order: number
   completedAt?: string
@@ -17,6 +17,6 @@ export interface NewTaskInput {
   title: string
   description?: string
   priority: TaskPriority
-  startDate: string
-  endDate: string
+  startDate?: string
+  endDate?: string
 }

@@ -11,8 +11,8 @@ interface TaskState {
   lastStreakDate: string | null
   addTask: (task: NewTaskInput) => void
   toggleCompleted: (taskId: string) => void
-  moveTask: (taskId: string, startDate: string, order: number) => void
-  reorderInDay: (day: string, orderedTaskIds: string[]) => void
+  moveTask: (taskId: string, startDate: string | undefined, order: number) => void
+  reorderInDay: (day: string | undefined, orderedTaskIds: string[]) => void
   recalculateStreak: () => void
   rollIncompleteTasksToToday: () => void
   checkStreakExpiry: () => void
@@ -83,7 +83,28 @@ export const useTaskStore = create<TaskState>()(
           return
         }
 
-        const durationDays = dayjs(targetTask.endDate).diff(dayjs(targetTask.startDate), 'day')
+        // If moving to backlog (no date)
+        if (!startDate) {
+          set((state) => ({
+            tasks: state.tasks.map((task) => {
+              if (task.id !== taskId) return task
+              return {
+                ...task,
+                startDate: undefined,
+                progressStartDate: undefined,
+                endDate: undefined,
+                order,
+              }
+            }),
+          }))
+          return
+        }
+
+        // If moving from backlog or between days
+        let durationDays = 0
+        if (targetTask.startDate && targetTask.endDate) {
+          durationDays = dayjs(targetTask.endDate).diff(dayjs(targetTask.startDate), 'day')
+        }
 
         set((state) => ({
           tasks: state.tasks.map((task) => {
@@ -103,13 +124,21 @@ export const useTaskStore = create<TaskState>()(
       reorderInDay: (day, orderedTaskIds) => {
         const orderMap = new Map(orderedTaskIds.map((taskId, index) => [taskId, index]))
 
-        set((state) => ({
-          tasks: state.tasks.map((task) => {
-            if (task.startDate !== day) return task
+        set((state) => {
+          const updatedTasks = state.tasks.map((task) => {
+            // Check if task belongs to the target day (or backlog if day is undefined/'backlog')
+            const isTargetDay =
+              day === undefined || day === 'backlog'
+                ? !task.startDate
+                : task.startDate === day
+
+            if (!isTargetDay) return task
+
             const order = orderMap.get(task.id)
             return typeof order === 'number' ? { ...task, order } : task
-          }),
-        }))
+          })
+          return { tasks: updatedTasks }
+        })
       },
 
       recalculateStreak: () => {
@@ -143,6 +172,7 @@ export const useTaskStore = create<TaskState>()(
 
           const updatedTasks = state.tasks.map((task) => {
             if (task.completed) return task
+            if (!task.startDate || !task.endDate) return task
 
             const taskStart = dayjs(task.startDate).startOf('day')
             const taskEnd = dayjs(task.endDate).startOf('day')
