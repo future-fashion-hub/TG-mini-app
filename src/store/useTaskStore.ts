@@ -166,6 +166,7 @@ export const useTaskStore = create<TaskState>()(
           const dayOrders = new Map<string, number>()
 
           state.tasks.forEach((task) => {
+            if (!task.startDate) return
             const nextOrder = dayOrders.get(task.startDate) ?? 0
             dayOrders.set(task.startDate, Math.max(nextOrder, task.order + 1))
           })
