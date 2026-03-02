@@ -4,11 +4,12 @@ import {
   DndContext,
   MouseSensor,
   TouchSensor,
+  pointerWithin,
   rectIntersection,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragMoveEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon, Modal, Text } from '@mantine/core'
 import { IconPlus, IconArchive } from '@tabler/icons-react'
@@ -32,6 +33,7 @@ function App() {
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
   const [justDroppedId, setJustDroppedId] = useState<string | null>(null)
   const [isDraggingFromBacklog, setIsDraggingFromBacklog] = useState(false)
+  const [hasExitedBacklog, setHasExitedBacklog] = useState(false)
   const { hapticFeedback } = useTelegramWebApp()
   const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
@@ -157,16 +159,28 @@ function App() {
     const id = String(event.active.id)
     if (taskDayMap.get(id) === 'backlog') {
       setIsDraggingFromBacklog(true)
+      setHasExitedBacklog(false)
     }
+  }
+
+  const handleDragMove = ({ delta }: DragMoveEvent) => {
+    // Distance logic removed in favor of pointerWithin and hover
   }
 
   const handleDragOver = ({ over }: DragOverEvent) => {
     if (!over) {
+      if (isDraggingFromBacklog) {
+        setHasExitedBacklog(true)
+      }
       setActiveDragOverDay(null)
       return
     }
     const overId = String(over.id)
     const targetDay = overId.startsWith('day-') ? overId.replace('day-', '') : (taskDayMap.get(overId) ?? null)
+
+    if (isDraggingFromBacklog && targetDay !== 'backlog') {
+      setHasExitedBacklog(true)
+    }
 
     setActiveDragOverDay(targetDay)
   }
@@ -179,6 +193,7 @@ function App() {
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     setActiveDragOverDay(null)
     setIsDraggingFromBacklog(false)
+    setHasExitedBacklog(false)
     if (!over) return
 
     const activeId = String(active.id)
@@ -223,9 +238,10 @@ function App() {
   const handleDragCancel = () => {
     setActiveDragOverDay(null)
     setIsDraggingFromBacklog(false)
+    setHasExitedBacklog(false)
   }
 
-  const shouldHideBacklogUi = isDraggingFromBacklog && activeDragOverDay !== 'backlog'
+  const shouldHideBacklogUi = isDraggingFromBacklog && hasExitedBacklog
 
   return (
     <Container size="xl" py="md" px="sm">
@@ -250,7 +266,7 @@ function App() {
           </Group>
         </Group>
 
-        <DndContext sensors={sensors} collisionDetection={rectIntersection} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+        <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
           <SimpleGrid
             cols={{ base: 1, xs: 2, sm: 2, md: 3, lg: 7 }}
             spacing={DAY_GAP_PX}
@@ -302,6 +318,7 @@ function App() {
               onToggleComplete={toggleCompleted}
               isDragOver={activeDragOverDay === 'backlog'}
               variant="backlog"
+              dropDisabled={shouldHideBacklogUi}
             />
           </Modal>
         </DndContext>

@@ -14,6 +14,7 @@ interface DayColumnProps {
   justDroppedId?: string | null
   clearJustDropped?: () => void
   variant?: 'default' | 'backlog'
+  dropDisabled?: boolean
 }
 
 export const DayColumn = ({
@@ -26,10 +27,12 @@ export const DayColumn = ({
   justDroppedId,
   clearJustDropped,
   variant = 'default',
+  dropDisabled = false,
 }: DayColumnProps) => {
   const isBacklog = variant === 'backlog'
   const { setNodeRef } = useDroppable({
     id: `day-${dayKey}`,
+    disabled: dropDisabled,
     data: {
       type: 'day',
       dayKey,
