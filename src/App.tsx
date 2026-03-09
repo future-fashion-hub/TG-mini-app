@@ -327,7 +327,7 @@ function App() {
       <Stack gap="md">
         <Group justify="space-between" align="center" wrap="nowrap">
           <div style={{ flex: 1 }}>
-            <Title order={2} style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>Weekly Manager</Title>
+            <Text fw={800} fz={24} lh={1}>Weekly Manager</Text>
           </div>
           <Group gap={12} wrap="nowrap">
              <ActionIcon 
@@ -342,7 +342,7 @@ function App() {
                <IconArchive size={24} />
              </ActionIcon>
              <StreakWidget streak={streak} />
-             <Button visibleFrom="sm" onClick={openAddTask} size="md">+ Задача</Button>
+             <Button visibleFrom="sm" onClick={openAddTask} size="lg" radius="md" style={{ fontWeight: 800, fontSize: '1.25rem' }}>+ Задача</Button>
           </Group>
         </Group>
 
@@ -420,13 +420,17 @@ function App() {
       <ActionIcon
         hiddenFrom="sm"
         className="fab-add"
-        size={56}
+        size={64}
         radius="xl"
         variant="filled"
+        color="blue"
         onClick={openAddTask}
         aria-label="Добавить задачу"
+        style={{
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        }}
       >
-        <IconPlus size={20} />
+        <IconPlus size={25} />
       </ActionIcon>
     </Container>
   )
