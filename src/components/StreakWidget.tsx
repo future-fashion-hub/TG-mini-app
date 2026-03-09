@@ -1,4 +1,4 @@
-import { Group, Text, ThemeIcon } from '@mantine/core'
+import { Group, ThemeIcon, Title } from '@mantine/core'
 import { IconFlame } from '@tabler/icons-react'
 
 interface StreakWidgetProps {
@@ -7,11 +7,11 @@ interface StreakWidgetProps {
 
 export const StreakWidget = ({ streak }: StreakWidgetProps) => (
   <Group gap={10} align="center">
-    <ThemeIcon variant="light" color="orange" size="lg" radius="md">
-      <IconFlame size={20} />
+    <ThemeIcon variant="light" color="orange" size="xl" radius="md" style={{ width: 44, height: 44 }}>
+      <IconFlame size={24} />
     </ThemeIcon>
-    <Text fw={700} size="xl" lh={1}>
+    <Title order={2} style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>
       {streak}
-    </Text>
+    </Title>
   </Group>
 )

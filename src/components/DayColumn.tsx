@@ -10,6 +10,7 @@ interface DayColumnProps {
   dayDate: string
   tasks: Task[]
   onToggleComplete: (taskId: string) => void
+  onEdit?: (task: Task) => void
   isDragOver?: boolean
   justDroppedId?: string | null
   clearJustDropped?: () => void
@@ -23,6 +24,7 @@ export const DayColumn = ({
   dayDate,
   tasks,
   onToggleComplete,
+  onEdit,
   isDragOver = false,
   justDroppedId,
   clearJustDropped,
@@ -74,6 +76,7 @@ export const DayColumn = ({
                 key={task.id}
                 task={task}
                 onToggleComplete={onToggleComplete}
+                onEdit={onEdit}
                 isDragOver={isDragOver}
                 justDropped={task.id === justDroppedId}
                 onDropAnimationDone={task.id === justDroppedId ? clearJustDropped : undefined}

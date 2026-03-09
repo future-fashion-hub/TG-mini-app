@@ -3,17 +3,18 @@ import { useForm } from '@mantine/form'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { useLayoutEffect, useState } from 'react'
-import type { NewTaskInput } from '../types/task'
+import type { NewTaskInput, Task } from '../types/task'
 import { DATE_FORMAT } from '../utils/date'
 
 interface AddTaskModalProps {
   opened: boolean
   defaultDate: string
+  initialTask?: Task | null
   onClose: () => void
   onSubmit: (payload: NewTaskInput) => void
 }
 
-export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTaskModalProps) => {
+export const AddTaskModal = ({ opened, defaultDate, initialTask, onClose, onSubmit }: AddTaskModalProps) => {
   const [expanded, setExpanded] = useState(false)
 
   const form = useForm<NewTaskInput>({
@@ -37,22 +38,33 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
 
   useLayoutEffect(() => {
     if (opened) {
-      setExpanded(false)
-      form.setValues({
-        title: '',
-        description: '',
-        priority: 'medium',
-        startDate: '',
-        endDate: '',
-      })
+      if (initialTask) {
+        setExpanded(!!(initialTask.description || initialTask.startDate || initialTask.endDate || initialTask.priority !== 'medium'))
+        form.setValues({
+          title: initialTask.title,
+          description: initialTask.description || '',
+          priority: initialTask.priority,
+          startDate: initialTask.startDate || '',
+          endDate: initialTask.endDate || '',
+        })
+      } else {
+        setExpanded(false)
+        form.setValues({
+          title: '',
+          description: '',
+          priority: 'medium',
+          startDate: defaultDate || '',
+          endDate: '',
+        })
+      }
     }
-  }, [opened, defaultDate])
+  }, [opened, defaultDate, initialTask])
 
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title="Новая задача"
+      title={initialTask ? 'Редактировать задачу' : 'Новая задача'}
       radius="lg"
       centered
     >
@@ -113,7 +125,7 @@ export const AddTaskModal = ({ opened, defaultDate, onClose, onSubmit }: AddTask
             <Button variant="default" onClick={onClose}>
               Отмена
             </Button>
-            <Button type="submit">Добавить</Button>
+            <Button type="submit">{initialTask ? 'Сохранить' : 'Добавить'}</Button>
           </Group>
         </Stack>
       </form>

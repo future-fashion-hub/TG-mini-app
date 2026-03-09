@@ -10,6 +10,7 @@ interface TaskState {
   streak: number
   lastStreakDate: string | null
   addTask: (task: NewTaskInput) => void
+  editTask: (taskId: string, payload: Partial<Task>) => void
   toggleCompleted: (taskId: string) => void
   moveTask: (taskId: string, startDate: string | undefined, order: number) => void
   reorderInDay: (day: string | undefined, orderedTaskIds: string[]) => void
@@ -43,6 +44,14 @@ export const useTaskStore = create<TaskState>()(
               order: sameDayTasks.length,
             },
           ],
+        }))
+      },
+
+      editTask: (taskId, payload) => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId ? { ...task, ...payload } : task
+          ),
         }))
       },
 

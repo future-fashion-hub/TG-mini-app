@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { Box, Button, Card, Checkbox, Group, Stack, Text } from '@mantine/core'
-import { IconBell, IconCalendar } from '@tabler/icons-react'
+import { ActionIcon, Box, Button, Card, Checkbox, Group, Stack, Text } from '@mantine/core'
+import { IconBell, IconCalendar, IconEdit } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
@@ -11,6 +11,7 @@ import { WaterCanvas } from './WaterCanvas'
 interface TaskCardProps {
   task: Task
   onToggleComplete: (taskId: string) => void
+  onEdit?: (task: Task) => void
   isDragOver?: boolean
   justDropped?: boolean
   onDropAnimationDone?: () => void
@@ -24,7 +25,7 @@ const priorityConfig = {
 
 const DISAPPEAR_DURATION = 500
 
-export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDropAnimationDone }: TaskCardProps) => {
+export const TaskCard = ({ task, onToggleComplete, onEdit, isDragOver, justDropped, onDropAnimationDone }: TaskCardProps) => {
   const [isDisappearing, setIsDisappearing] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -36,7 +37,8 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
     },
   })
 
-  const handleToggle = () => {
+  const handleToggle = (event?: React.ChangeEvent) => {
+    event?.stopPropagation()
     if (isDisappearing) return
     setIsDisappearing(true)
     timerRef.current = setTimeout(() => {
@@ -86,20 +88,34 @@ export const TaskCard = ({ task, onToggleComplete, isDragOver, justDropped, onDr
 
       <Stack gap={6} style={{ position: 'relative', zIndex: 1 }}>
         <Group justify="space-between" align="start" wrap="nowrap">
-          <Text fw={600} size="sm" lineClamp={2} td={task.completed ? 'line-through' : 'none'}>
+          <Text fw={600} size="sm" lineClamp={2} td={task.completed ? 'line-through' : 'none'} style={{ flex: 1 }}>
             {task.title}
           </Text>
-          <Box
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              flex: '0 0 auto',
-              marginTop: 4,
-              backgroundColor: priorityConfig[task.priority].color,
-            }}
-            title={`priority-${task.priority}`}
-          />
+          <Group gap={4} wrap="nowrap" align="center">
+            {onEdit && (
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit(task)
+                }}
+              >
+                <IconEdit size={16} />
+              </ActionIcon>
+            )}
+            <Box
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                flex: '0 0 auto',
+                backgroundColor: priorityConfig[task.priority].color,
+              }}
+              title={`priority-${task.priority}`}
+            />
+          </Group>
         </Group>
 
         {task.description ? (

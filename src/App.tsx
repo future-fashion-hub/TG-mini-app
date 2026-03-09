@@ -27,6 +27,7 @@ const DAY_GAP_PX = 12
 function App() {
   const [now, setNow] = useState(dayjs())
   const [modalOpened, setModalOpened] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [backlogOpened, setBacklogOpened] = useState(false)
   const [selectedDay, setSelectedDay] = useState(formatISODate(now))
   const [activeDragOverDay, setActiveDragOverDay] = useState<string | null>(null)
@@ -34,7 +35,7 @@ function App() {
   const [isDraggingFromBacklog, setIsDraggingFromBacklog] = useState(false)
   const [hasExitedBacklog, setHasExitedBacklog] = useState(false)
   const { hapticFeedback } = useTelegramWebApp()
-  const { tasks, streak, addTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
+  const { tasks, streak, addTask, editTask, toggleCompleted, moveTask, reorderInDay, rollIncompleteTasksToToday, checkStreakExpiry } = useTaskStore()
   const todayKey = formatISODate(now)
 
   const weekStart = getWeekStart(now)
@@ -234,7 +235,21 @@ function App() {
 
   const openAddTask = () => {
     setSelectedDay(todayKey)
+    setEditingTask(null)
     setModalOpened(true)
+  }
+
+  const handleEditTaskClick = (task: Task) => {
+    setEditingTask(task)
+    setModalOpened(true)
+  }
+
+  const handleModalSubmit = (payload: any) => {
+    if (editingTask) {
+      editTask(editingTask.id, payload)
+    } else {
+      addTask(payload)
+    }
   }
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -314,19 +329,20 @@ function App() {
           <div style={{ flex: 1 }}>
             <Title order={2} style={{ fontSize: '1.5rem', lineHeight: 1.2 }}>Weekly Manager</Title>
           </div>
-          <Group gap={8} wrap="nowrap">
+          <Group gap={12} wrap="nowrap">
              <ActionIcon 
                 variant="light" 
                 color="blue" 
-                size="lg" 
+                size="xl" 
                 radius="md" 
+                style={{ width: 44, height: 44 }}
                 onClick={() => setBacklogOpened(true)}
                 aria-label="Backlog"
              >
-               <IconArchive size={20} />
+               <IconArchive size={24} />
              </ActionIcon>
              <StreakWidget streak={streak} />
-             <Button visibleFrom="sm" onClick={openAddTask} size="xs">+ Задача</Button>
+             <Button visibleFrom="sm" onClick={openAddTask} size="md">+ Задача</Button>
           </Group>
         </Group>
 
@@ -345,6 +361,7 @@ function App() {
                 dayDate={day.date.format('DD.MM')}
                 tasks={tasksByDay.get(day.key) ?? []}
                 onToggleComplete={toggleCompleted}
+                onEdit={handleEditTaskClick}
                 isDragOver={activeDragOverDay === day.key}
                 justDroppedId={justDroppedId}
                 clearJustDropped={() => setJustDroppedId(null)}
@@ -380,6 +397,7 @@ function App() {
               dayDate=""
               tasks={tasksByDay.get('backlog') ?? []}
               onToggleComplete={toggleCompleted}
+              onEdit={handleEditTaskClick}
               isDragOver={activeDragOverDay === 'backlog'}
               variant="backlog"
               dropDisabled={shouldHideBacklogUi}
@@ -391,8 +409,12 @@ function App() {
       <AddTaskModal
         opened={modalOpened}
         defaultDate={selectedDay}
-        onClose={() => setModalOpened(false)}
-        onSubmit={addTask}
+        initialTask={editingTask}
+        onClose={() => {
+          setModalOpened(false)
+          setTimeout(() => setEditingTask(null), 300)
+        }}
+        onSubmit={handleModalSubmit}
       />
 
       <ActionIcon
