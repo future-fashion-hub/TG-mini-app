@@ -10,7 +10,7 @@ import {
 } from '@dnd-kit/core'
 import type { CollisionDetection, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Button, Container, Group, SimpleGrid, Stack, Title, ActionIcon, Modal, Text } from '@mantine/core'
+import { Button, Container, Group, SimpleGrid, Stack, ActionIcon, Modal, Text } from '@mantine/core'
 import { IconPlus, IconArchive } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { AddTaskModal } from './components/AddTaskModal'
